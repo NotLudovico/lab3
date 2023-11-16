@@ -1,17 +1,21 @@
+#include<cmath>
+
 void iv() {
   TCanvas* c1 = new TCanvas();
   const int N_POINTS = 9;
   const int TACCHETTE_APPREZZABILI = 10;
 
+  // Oscill (V)
   Float_t x[N_POINTS] = {400, 450, 500, 550, 600, 650, 700, 720, 760};
+  // Mult (A)
   Float_t y[N_POINTS] = {0.005, 0.020, 0.068, 0.198, 0.612,
                          1.783, 4.89,  9.8,   18.4};
   Float_t ex[N_POINTS] = {5, 5, 5, 5, 5, 5, 5, 5, 5};  // VOLTS/DIV
   Float_t ey[N_POINTS] = {};
 
   // Calculate error on oscilloscope
-  for (size_t i = 0; i < N_POINTS; i++) {
-    ex[i] = ex[i] * TACCHETTE_APPREZZABILI / 5.;
+  for (int i = 0; i < N_POINTS; i++) {
+    ex[i] = sqrt(pow(2. * ex[i] * TACCHETTE_APPREZZABILI / 5., 2) + pow(x[i] * 0.03,2));
   }
 
   TGraphErrors* gr = new TGraphErrors(N_POINTS, x, y, ex, ey);
