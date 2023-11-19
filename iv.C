@@ -2,24 +2,41 @@
 
 void iv() {
   TCanvas* c1 = new TCanvas();
-  const int N_POINTS = 9;
+  const int N_POINTS = 16;
   const double TACCHETTE_APPREZZABILI = 0.5;
+  const double m_cal = 1.01;
+  const double q_cal = 4.0;
 
   // Oscill (V)
-  Float_t x[N_POINTS] = {400, 450, 500, 550, 600, 650, 700, 720, 760};
+  Float_t oscill[N_POINTS] = {420, 440, 460, 480, 500, 520, 540, 560,
+                              580, 600, 620, 640, 660, 680, 700, 720};
   // Mult (A)
-  Float_t y[N_POINTS] = {0.005, 0.020, 0.068, 0.198, 0.612,
-                         1.783, 4.89,  9.8,   18.4};
-  Float_t ex[N_POINTS] = {5, 5, 5, 5, 5, 5, 5, 5, 5};  // VOLTS/DIV
-  Float_t ey[N_POINTS] = {};
+  Float_t mult[N_POINTS] = {0.02, 0.03, 0.04, 0.06, 0.08, 0.13, 0.2,  0.3,
+                            0.45, 0.67, 1,    1.51, 2.23, 3.3,  4.84, 7.66};
+  Float_t e_oscill[N_POINTS] = {
+      100, 100, 100, 100, 100, 100, 100, 100,
+      100, 100, 100, 100, 100, 100, 200};  // VOLTS/DIV
+  Float_t e_mult[N_POINTS] = {};
 
-  // Calculate error on oscilloscope
+  // Calculate error
   for (int i = 0; i < N_POINTS; i++) {
-    ex[i] = sqrt(pow(2. * ex[i] * TACCHETTE_APPREZZABILI / 5., 2) +
-                 pow(x[i] * 0.03, 2));
+    // Error on oscilloscope
+    e_oscill[i] = sqrt(2. * pow(e_oscill[i] * TACCHETTE_APPREZZABILI / 5., 2) +
+                       pow(oscill[i] * 0.03, 2));
+    // Error on multimeter
+    e_mult[i] =
+        static_cast<float>(static_cast<int>(mult[i] * 0.015 * 1e4 + 0.5)) /
+            1e4 +
+        0.02;
+    std::cout << e_mult[i] << std::endl;
   }
 
-  TGraphErrors* gr = new TGraphErrors(N_POINTS, x, y, ex, ey);
+  // Fix Oscilloscope measure
+  for (size_t i = 0; i < N_POINTS; i++) {
+    oscill[i] = (oscill[i] - q_cal) / m_cal;
+  }
+
+  TGraphErrors* gr = new TGraphErrors(N_POINTS, oscill, mult, e_oscill, e_mult);
   gr->SetTitle("Diodo al Si");
 
   gr->SetMarkerStyle(4);
@@ -29,7 +46,7 @@ void iv() {
   gr->GetXaxis()->SetTitle("Voltage (mV)");
   gr->GetYaxis()->SetTitle("Current (mA)");
 
-  TF1* f1 = new TF1("f1", "[0]*exp(x/[1] - 1.)", 350, 800);
+  TF1* f1 = new TF1("f1", "[0]*(exp(x/[1]) - 1.)", 350, 800);
   f1->SetParameter(0, 1E-6);
   f1->SetParName(0, "I0");
 
