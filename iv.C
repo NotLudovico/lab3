@@ -1,9 +1,9 @@
-#include<cmath>
+#include <cmath>
 
 void iv() {
   TCanvas* c1 = new TCanvas();
   const int N_POINTS = 9;
-  const int TACCHETTE_APPREZZABILI = 10;
+  const double TACCHETTE_APPREZZABILI = 0.5;
 
   // Oscill (V)
   Float_t x[N_POINTS] = {400, 450, 500, 550, 600, 650, 700, 720, 760};
@@ -15,7 +15,8 @@ void iv() {
 
   // Calculate error on oscilloscope
   for (int i = 0; i < N_POINTS; i++) {
-    ex[i] = sqrt(pow(2. * ex[i] * TACCHETTE_APPREZZABILI / 5., 2) + pow(x[i] * 0.03,2));
+    ex[i] = sqrt(pow(2. * ex[i] * TACCHETTE_APPREZZABILI / 5., 2) +
+                 pow(x[i] * 0.03, 2));
   }
 
   TGraphErrors* gr = new TGraphErrors(N_POINTS, x, y, ex, ey);
@@ -28,7 +29,7 @@ void iv() {
   gr->GetXaxis()->SetTitle("Voltage (mV)");
   gr->GetYaxis()->SetTitle("Current (mA)");
 
-  TF1* f1 = new TF1("f1", "[0]*exp(x/[1] - 1.)", 400, 800);
+  TF1* f1 = new TF1("f1", "[0]*exp(x/[1] - 1.)", 350, 800);
   f1->SetParameter(0, 1E-6);
   f1->SetParName(0, "I0");
 
