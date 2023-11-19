@@ -1,6 +1,6 @@
 #include <cmath>
 
-void iv() {
+void si() {
   TCanvas* c1 = new TCanvas();
   const int N_POINTS = 16;
   const double TACCHETTE_APPREZZABILI = 0.5;
@@ -51,7 +51,7 @@ void iv() {
   f1->SetParName(0, "I0");
 
   f1->SetParameter(1, 50.);
-  f1->SetParName(1, "#eta*VT");
+  f1->SetParName(1, "#eta*V_T");
 
   gr->Fit("f1", "R");
   gStyle->SetOptFit(1111);
