@@ -21,7 +21,8 @@ void si() {
   // Calculate error
   for (int i = 0; i < N_POINTS; i++) {
     // Error on oscilloscope
-    e_oscill[i] = sqrt(2. * pow(e_oscill[i] * TACCHETTE_APPREZZABILI / 5., 2) +
+    e_oscill[i] = sqrt(pow(e_oscill[i] * TACCHETTE_APPREZZABILI / 5., 2) +
+                       pow(5. * TACCHETTE_APPREZZABILI / 5., 2) +
                        pow(oscill[i] * 0.03, 2));
     std::cout << "Errore Oscilloscopio -> Misura " << oscill[i] << " : "
               << e_oscill[i] << std::endl;
@@ -55,7 +56,7 @@ void si() {
   f1->SetParName(0, "I0");
 
   f1->SetParameter(1, 50.);
-  f1->SetParName(1, "#eta*V_T");
+  f1->SetParName(1, "#etaV_{T}");
 
   gr->Fit("f1", "R");
   gStyle->SetOptFit(1111);
