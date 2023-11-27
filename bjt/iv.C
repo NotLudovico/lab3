@@ -1,3 +1,6 @@
+
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
@@ -148,10 +151,17 @@ void gen_latex_table(Int_t* fondoscala, Double_t* volt_err, Double_t* volt,
       "\\textbf{Corrente I(mA)} \\\\ \\hline \n";
 
   for (int i = 0; i < N_POINTS; i++) {
+    std::stringstream stream_v;
+    stream_v << std::setprecision(1) << volt_err[i];
+    std::string volt_err = stream_v.str();
+    stream_v.str("");
+    stream_v << std::setprecision(1) << curr_err[i];
+    std::string curr_err = stream_v.str();
+
     table += "\t" + std::to_string(fondoscala[i]) + " & $" +
-             std::to_string(volt[i]) + " \\pm " + std::to_string(volt_err[i]) +
-             "$ & $" + std::to_string(curr[i]) + " \\pm " +
-             std::to_string(curr_err[i]) + "$ \\\\ \\hline \n";
+             std::to_string(volt[i]) + " \\pm " + volt_err + "$ & $" +
+             std::to_string(curr[i]) + " \\pm " + curr_err +
+             "$ \\\\ \\hline \n";
   }
   table += "\\end{tabular} \n\\end{table}";
   std::cout << "\n\n\n\n" << table << "\n\n\n\n";
