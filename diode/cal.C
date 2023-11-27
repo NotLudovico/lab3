@@ -38,7 +38,7 @@ void cal() {
   gr->GetXaxis()->SetTitle("V_{multimetro}(mV)");
   gr->GetYaxis()->SetTitle("V_{oscilloscopio}(mV)");
 
-  TF1* f1 = new TF1("f1", "[0]*x+[1]", 70, 650);
+  TF1* f1 = new TF1("f1", "[0]*x+[1]", 0, 650);
   f1->SetParameter(0, 1.);
   f1->SetParName(0, "m");
 

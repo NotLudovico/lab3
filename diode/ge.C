@@ -1,20 +1,20 @@
 void ge() {
   TCanvas* c1 = new TCanvas();
-  const int N_POINTS = 20;
+
+  const int N_POINTS = 15;
   const double TACCHETTE_APPREZZABILI = 0.5;
   const double m_cal = 1.017;
   const double q_cal = 2.635;
 
   // Oscill (V)
-  Float_t oscill[N_POINTS] = {80,  100, 120, 140, 150, 160, 180, 200, 220, 240,
-                              260, 280, 300, 320, 340, 360, 380, 400, 420, 440};
+  Float_t oscill[N_POINTS] = {80,  100, 120, 140, 150, 160, 180, 200,
+                              220, 240, 260, 280, 300, 320, 340};
   // Mult (A)
-  Float_t mult[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09, 0.12, 0.19,
-                            0.28, 0.41, 0.59, 0.84, 1.16, 1.58, 2.1,
-                            2.73, 3.5,  4.44, 5.59, 6.91, 8.42};
-  Float_t e_oscill[N_POINTS] = {20,  20,  20,  20,  50,  100, 100,
-                                100, 100, 100, 100, 100, 100, 100,
-                                100, 100, 100, 100, 100, 100};  // VOLTS/DIV
+  Float_t mult[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09, 0.12, 0.19, 0.28,
+                            0.41, 0.59, 0.84, 1.16, 1.58, 2.1,  2.73};
+  Float_t e_oscill[N_POINTS] = {
+      20,  20,  20,  20,  50,  100, 100, 100,
+      100, 100, 100, 100, 100, 100, 100};  // VOLTS/DIV
   Float_t e_mult[N_POINTS] = {};
 
   // Calculate error
@@ -49,11 +49,11 @@ void ge() {
   gr->GetXaxis()->SetTitle("V(mV)");
   gr->GetYaxis()->SetTitle("I(mA)");
 
-  TF1* f1 = new TF1("f1", "[0]*(exp(x/[1]) - 1.)", 70, 130);
+  TF1* f1 = new TF1("f1", "[0]*exp(x/[1])", 70, 200);
   f1->SetParameter(0, 1E-3);
   f1->SetParName(0, "I0");
 
-  f1->SetParameter(1, 50.);
+  f1->SetParameter(1, 80.);
   f1->SetParName(1, "#etaV_{T}");
 
   gr->Fit("f1", "R");

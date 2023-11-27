@@ -2,6 +2,8 @@
 
 void si() {
   TCanvas* c1 = new TCanvas();
+  c1->SetGrid();
+
   const int N_POINTS = 16;
   const double TACCHETTE_APPREZZABILI = 0.5;
   const double m_cal = 1.017;
@@ -51,9 +53,9 @@ void si() {
   gr->GetXaxis()->SetTitle("V(mV)");
   gr->GetYaxis()->SetTitle("I(mA)");
 
-  TF1* f1 = new TF1("f1", "[0]*(exp(x/[1]) - 1.)", 350, 800);
+  TF1* f1 = new TF1("f1", "[0]*exp(x/[1])", 400, 750);
   f1->SetParameter(0, 1E-6);
-  f1->SetParName(0, "I0");
+  f1->SetParName(0, "I_{0}");
 
   f1->SetParameter(1, 50.);
   f1->SetParName(1, "#etaV_{T}");
