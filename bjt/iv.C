@@ -54,8 +54,8 @@ void iv() {
   TGraphErrors* gr200 =
       new TGraphErrors(N_POINTS, volt, curr200, volt_err, curr200_err);
 
-  build_graph(gr100, kRed, 100, 1, 4);
-  build_graph(gr200, kBlue, 200, 1, 4);
+  build_graph(gr100, kRed, 100, 80, 250);
+  build_graph(gr200, kBlue, 200, 80, 250);
 
   gr100->Draw("AP");
   gr200->Draw("SAME P");
@@ -171,6 +171,11 @@ void gen_latex_table(Int_t* fondoscala, Double_t* volt_err, Double_t* volt,
   std::cout << "\\end{tabular} \n\\end{table}\n\n\n\n";
 }
 
+/*
+
+  APPROXIMATION
+
+*/
 void approx(double value, double err) {
   std::stringstream stream;
   stream << std::setprecision(1) << err;
@@ -204,12 +209,18 @@ void approx(double value, double err) {
       pow *= 10;
     }
     value = static_cast<float>(static_cast<int>(value * pow + approx)) / pow;
+    std::cout << value << " ± " << err_str;
   } else {
     for (int i = 0; i < counter + 1; i++) {
       pow /= 10.;
     }
     value = static_cast<float>(static_cast<int>(value * pow + approx));
+    std::string pow_str = "";
+    if (power > 1) {
+      pow_str = "^{" + std::to_string(power) + "}";
+    }
+    std::cout << "\n\n"
+              << "(" << value << " ± "
+              << err_str.substr(0, err_str.length() - 4) << ") \\cdot 10";
   }
-
-  std::cout << value << " ± " << err_str;
 }
