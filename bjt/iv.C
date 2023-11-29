@@ -11,7 +11,9 @@ void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
                    double width = 0.25, double height = 0.1, double x = 0.65,
                    double y = 0.15, double vert_spacing = 0.01);
 void gen_latex_table(Int_t* fondoscala, Double_t* volt_err, Double_t* volt,
-                     Double_t* curr, Double_t* curr_err, int N_POINTS);
+                     Double_t* curr, Double_t* curr_err, int N_POINTS,
+                     int decimal);
+void approx(double value, double err);
 /*
 
   MACRO
@@ -25,10 +27,10 @@ void iv() {
   const int N_POINTS = 5;
 
   // Data
-  Double_t volt[N_POINTS] = {0.5, 1, 1.5, 2, 2.5};
+  Double_t volt[N_POINTS] = {80, 100, 150, 200, 250};
   Double_t volt_err[N_POINTS] = {20, 20, 20, 20, 20};  // Volt/Div
-  Double_t curr100[N_POINTS] = {0, 1, 1.2, 1.3, 1.4};
-  Double_t curr200[N_POINTS] = {0, 0.5, 0.6, 0.7, 0.8};
+  Double_t curr100[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09};
+  Double_t curr200[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09};
 
   // Errors (Calculated automatically)
   Double_t curr100_err[N_POINTS] = {};
@@ -36,13 +38,15 @@ void iv() {
 
   // Calculating errors
   Int_t fondoscala[N_POINTS];  // Don't touch
-  std::copy(volt_err, volt_err + 5, fondoscala);
+  std::copy(volt_err, volt_err + N_POINTS, fondoscala);
   calc_err("MULT", curr100, curr100_err, N_POINTS);
   calc_err("MULT", curr200, curr200_err, N_POINTS);
   calc_err("OSCILL", volt, volt_err, N_POINTS);
 
-  gen_latex_table(fondoscala, volt_err, volt, curr100, curr100_err, N_POINTS);
-  gen_latex_table(fondoscala, volt_err, volt, curr200, curr200_err, N_POINTS);
+  gen_latex_table(fondoscala, volt_err, volt, curr100, curr100_err, N_POINTS,
+                  3);
+  gen_latex_table(fondoscala, volt_err, volt, curr200, curr200_err, N_POINTS,
+                  3);
 
   TGraphErrors* gr100 =
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
@@ -61,6 +65,7 @@ void iv() {
   set_box_stats(gr100, gr200, 0.25, 0.1, 0.65, 0.15, 0.01);
   c1->Modified();
 
+  // Calculate Delta I_C
   Double_t delta_I[N_POINTS] = {};
   for (int i = 0; i < N_POINTS; i++) {
     delta_I[i] = abs(curr200[i] - curr100[i]);
@@ -68,6 +73,7 @@ void iv() {
 
   TCanvas* c2 = new TCanvas();
   c2->SetGrid();
+  // Plot Delta I_C
   TGraph* grDelta = new TGraph(N_POINTS, volt, delta_I);
   grDelta->SetMarkerStyle(8);
   grDelta->SetMarkerColor(kBlue);
@@ -95,7 +101,7 @@ void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
   f->SetParName(0, ("m_{" + std::to_string(num) + "}").c_str());
   f->SetParameter(1, prov_q);
   f->SetParName(1, ("q_{" + std::to_string(num) + "}").c_str());
-  graph->Fit("f", "R");
+  graph->Fit("f", "RQ");
 }
 /*
 
@@ -142,27 +148,68 @@ void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
   st2->SetY2NDC(y + vert_spacing + height * 2);
 }
 
+/*
+
+  GENERATE LATEX TABLE WITH DATA AND ERRORS
+
+*/
 void gen_latex_table(Int_t* fondoscala, Double_t* volt_err, Double_t* volt,
-                     Double_t* curr, Double_t* curr_err, int N_POINTS) {
-  std::string table =
-      "\\begin{table}[] \n\\begin{tabular} {| c | c | c |} "
-      "\n\\hline \n"
-      "\\textbf{Fondo Scala (mV)} & \\textbf{Tensione V(mV)} & "
-      "\\textbf{Corrente I(mA)} \\\\ \\hline \n";
+                     Double_t* curr, Double_t* curr_err, int N_POINTS,
+                     int decimal) {
+  std::cout << "\\begin{table}[] \n\\begin{tabular} {| c | c | c |} "
+               "\n\\hline \n"
+               "\\textbf{Fondo Scala (mV)} & \\textbf{Tensione V(mV)} & "
+               "\\textbf{Corrente I(mA)} \\\\ \\hline \n";
 
   for (int i = 0; i < N_POINTS; i++) {
-    std::stringstream stream_v;
-    stream_v << std::setprecision(1) << volt_err[i];
-    std::string volt_err = stream_v.str();
-    stream_v.str("");
-    stream_v << std::setprecision(1) << curr_err[i];
-    std::string curr_err = stream_v.str();
-
-    table += "\t" + std::to_string(fondoscala[i]) + " & $" +
-             std::to_string(volt[i]) + " \\pm " + volt_err + "$ & $" +
-             std::to_string(curr[i]) + " \\pm " + curr_err +
-             "$ \\\\ \\hline \n";
+    std::cout << "\t" << std::to_string(fondoscala[i]) << " & $";
+    approx(volt[i], volt_err[i]);
+    std::cout << "$ & $";
+    approx(curr[i], curr_err[i]);
+    std::cout << "$ \\\\ \\hline \n";
   }
-  table += "\\end{tabular} \n\\end{table}";
-  std::cout << "\n\n\n\n" << table << "\n\n\n\n";
+  std::cout << "\\end{tabular} \n\\end{table}\n\n\n\n";
+}
+
+void approx(double value, double err) {
+  std::stringstream stream;
+  stream << std::setprecision(1) << err;
+  std::string err_str = stream.str();
+  stream.str("");
+
+  int counter = 0;
+  int power = 0;
+  bool has_found_period = false;
+
+  for (int i = 0; i < err_str.length(); i++) {
+    if (err_str[i] == '.') {
+      has_found_period = true;
+      continue;
+    }
+    if (err_str[i] == 'e') {
+      power = std::stoi(err_str.substr(i + 1, err_str.length()));
+      break;
+    }
+    if (has_found_period) {
+      counter += 1;
+    }
+  }
+
+  double pow = 1.;
+  double approx = 0.5;
+  if (value < 0) approx *= -1;
+
+  if (power == 0) {
+    for (int i = 0; i < counter; i++) {
+      pow *= 10;
+    }
+    value = static_cast<float>(static_cast<int>(value * pow + approx)) / pow;
+  } else {
+    for (int i = 0; i < counter + 1; i++) {
+      pow /= 10.;
+    }
+    value = static_cast<float>(static_cast<int>(value * pow + approx));
+  }
+
+  std::cout << value << " ± " << err_str;
 }

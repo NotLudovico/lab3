@@ -9,8 +9,7 @@ void cal() {
                             292.8, 389.6, 491.4, 586.6};
   Float_t oscill[N_POINTS] = {80, 100, 150, 200, 250, 300, 400, 500, 600};
   Float_t e_mult[N_POINTS] = {};
-  Float_t e_oscill[N_POINTS] = {20, 20,  50,  50, 50,
-                                50, 100, 100, 100};  // Riportare VOLT/DIV
+  Float_t e_oscill[N_POINTS] = {20, 20, 50, 50, 50};  // Riportare VOLT/DIV
 
   // Calculate error
   for (int i = 0; i < N_POINTS; i++) {
