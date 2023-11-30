@@ -54,7 +54,8 @@ void iv() {
   TGraphErrors* gr200 =
       new TGraphErrors(N_POINTS, volt, curr200, volt_err, curr200_err);
 
-  // Graph - Color - Current Value - Fit Min - Fit Max
+  // Graph - Color - Current Value - Fit Min - Fit Max - Fit M (Optional) - Fit
+  // Q (Optional)
   build_graph(gr100, kRed, 100, 80, 250);
   build_graph(gr200, kBlue, 200, 80, 250);
 
