@@ -4,7 +4,7 @@
 #include <string>
 
 void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
-                 double fit_max, double prov_m = 0.4, double prov_q = 3);
+                 double fit_max, double prov_m = 0.4, double prov_q = 0);
 void calc_err(std::string instrument, Double_t* data, Double_t* err,
               int N_POINTS);
 void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
@@ -30,7 +30,7 @@ void iv() {
   Double_t volt[N_POINTS] = {80, 100, 150, 200, 250};
   Double_t volt_err[N_POINTS] = {20, 20, 20, 20, 20};  // Volt/Div
   Double_t curr100[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09};
-  Double_t curr200[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09};
+  Double_t curr200[N_POINTS] = {0.04, 0.06, 0.08, 0.14, 0.18};
 
   // Errors (Calculated automatically)
   Double_t curr100_err[N_POINTS] = {};
@@ -54,11 +54,20 @@ void iv() {
   TGraphErrors* gr200 =
       new TGraphErrors(N_POINTS, volt, curr200, volt_err, curr200_err);
 
+  // Graph - Color - Current Value - Fit Min - Fit Max
   build_graph(gr100, kRed, 100, 80, 250);
   build_graph(gr200, kBlue, 200, 80, 250);
 
-  gr100->Draw("AP");
-  gr200->Draw("SAME P");
+  TMultiGraph* mg = new TMultiGraph();
+  mg->Add(gr100);
+  mg->Add(gr200);
+  mg->Draw("AP");
+
+  auto legend = new TLegend(0.15, 0.79, 0.35, 0.89);
+
+  legend->AddEntry(gr100, "I_{b} = -100#muA", "lp");
+  legend->AddEntry(gr200, "I_{b} = -200#muA", "lp");
+  legend->Draw();
 
   // Statistics Box Cosmetics
   c1->Update();
@@ -89,19 +98,20 @@ void iv() {
 */
 void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
                  double fit_max, double prov_m = 0.4, double prov_q = 3) {
-  graph->SetMarkerStyle(4);
+  graph->SetMarkerStyle(8);
   graph->SetMarkerColor(color);
   graph->GetXaxis()->SetTitle("-V_{CE} (V)");
   graph->GetYaxis()->SetTitle("-I_{C} (mA)");
   graph->SetTitle("Caratteristica di uscita del BJT");
 
-  TF1* f = new TF1("f", "[0]*x+[1]", fit_min, fit_max);
+  TF1* f = new TF1(("f" + std::to_string(num)).c_str(), "[0]*x+[1]", fit_min,
+                   fit_max);
   f->SetLineColor(color);
   f->SetParameter(0, prov_m);
   f->SetParName(0, ("m_{" + std::to_string(num) + "}").c_str());
   f->SetParameter(1, prov_q);
   f->SetParName(1, ("q_{" + std::to_string(num) + "}").c_str());
-  graph->Fit("f", "RQ");
+  graph->Fit(("f" + std::to_string(num)).c_str(), "R");
 }
 /*
 

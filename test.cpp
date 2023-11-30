@@ -4,8 +4,8 @@
 #include <string>
 
 int main() {
-  double value = 80;
-  double err = 4.1231;
+  double value = 150;
+  double err = 12.3;
 
   std::stringstream stream;
   stream << std::setprecision(1) << err;
@@ -41,11 +41,18 @@ int main() {
       pow *= 10;
     }
     value = static_cast<float>(static_cast<int>(value * pow + approx)) / pow;
+    std::cout << "\n\n" << value << " ± " << err_str;
   } else {
     for (int i = 0; i < counter + 1; i++) {
       pow /= 10.;
     }
     value = static_cast<float>(static_cast<int>(value * pow + approx));
+    std::string pow_str = "";
+    if (power > 1) {
+      pow_str = "^{" + std::to_string(power) + "}";
+    }
+    std::cout << "\n\n"
+              << "(" << value << " ± "
+              << err_str.substr(0, err_str.length() - 4) << ") \\cdot 10";
   }
-  std::cout << "\n\n" << value << " ± " << err_str;
 }
