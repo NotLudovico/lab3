@@ -38,7 +38,10 @@ void iv() {
                                 10.15, 12.09, 13.21, 13.92, 14.25, 14.92, 15.7,
                                 15.88, 15.99, 16.04, 16.11, 16.16, 16.21, 16.26,
                                 16.4,  16.93, 17.38, 17.67, 18.45, 19.16};
-  Double_t curr50[N_POINTS] = {0.04, 0.06, 0.08, 0.14, 0.18};
+  Double_t curr50[N_POINTS] = {0.36, 0.81, 1.49, 2.47, 3.80, 5.05, 6.17,
+                               6.95, 7.83, 8.23, 8.39, 8.47, 8.55, 8.70,
+                               8.77, 8.79, 8.81, 8.83, 8.85, 8.87, 8.89,
+                               8.92, 9.23, 9.44, 9.62, 9.77, 9.93};
 
   // Errors (Calculated automatically)
   Double_t curr100_err[N_POINTS] = {};
@@ -63,8 +66,8 @@ void iv() {
 
   // Graph - Color - Current Value - Fit Min - Fit Max - Fit M (Optional) - Fit
   // Q (Optional)
-  build_graph(gr100, kRed, 100, 80, 250);
-  build_graph(gr200, kBlue, 200, 80, 250);
+  build_graph(gr100, kRed, 100, 0.5, 4);
+  build_graph(gr200, kBlue, 50, 0.5, 4);
 
   TMultiGraph* mg = new TMultiGraph();
   mg->Add(gr100);
@@ -73,7 +76,7 @@ void iv() {
 
   TLegend* legend = new TLegend(0.15, 0.79, 0.35, 0.89);
   legend->AddEntry(gr100, "I_{b} = -100#muA", "lp");
-  legend->AddEntry(gr200, "I_{b} = -200#muA", "lp");
+  legend->AddEntry(gr200, "I_{b} = -50#muA", "lp");
   legend->Draw();
 
   // Statistics Box Cosmetics
