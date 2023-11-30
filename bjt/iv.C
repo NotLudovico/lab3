@@ -24,35 +24,42 @@ void iv() {
   c1->SetGrid();
   gStyle->SetOptFit(0111);
 
-  const int N_POINTS = 5;
+  const int N_POINTS = 27;
 
   // Data
-  Double_t volt[N_POINTS] = {80, 100, 150, 200, 250};
-  Double_t volt_err[N_POINTS] = {20, 20, 20, 20, 20};  // Volt/Div
-  Double_t curr100[N_POINTS] = {0.02, 0.03, 0.04, 0.07, 0.09};
-  Double_t curr200[N_POINTS] = {0.04, 0.06, 0.08, 0.14, 0.18};
+  Double_t volt[N_POINTS] = {0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18,
+                             0.20, 0.24, 0.28, 0.32, 0.36, 0.40, 0.60,
+                             0.72, 0.76, 0.80, 0.84, 0.88, 0.92, 0.96,
+                             1,    1.5,  2,    2.5,  3,    4};  // Volt
+  Double_t volt_err[N_POINTS] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                                 0.5, 0.5, 0.5, 0.5, 1,   1};  // Volt/Div
+  Double_t curr100[N_POINTS] = {0.9,   1.79,  2.92,  4.34,  5.86,  7.54,  8.91,
+                                10.15, 12.09, 13.21, 13.92, 14.25, 14.92, 15.7,
+                                15.88, 15.99, 16.04, 16.11, 16.16, 16.21, 16.26,
+                                16.4,  16.93, 17.38, 17.67, 18.45, 19.16};
+  Double_t curr50[N_POINTS] = {0.04, 0.06, 0.08, 0.14, 0.18};
 
   // Errors (Calculated automatically)
   Double_t curr100_err[N_POINTS] = {};
-  Double_t curr200_err[N_POINTS] = {};
+  Double_t curr50_err[N_POINTS] = {};
 
   // Calculating errors
   Int_t fondoscala[N_POINTS];  // Don't touch
   std::copy(volt_err, volt_err + N_POINTS, fondoscala);
   calc_err("MULT", curr100, curr100_err, N_POINTS);
-  calc_err("MULT", curr200, curr200_err, N_POINTS);
+  calc_err("MULT", curr50, curr50_err, N_POINTS);
   calc_err("OSCILL", volt, volt_err, N_POINTS);
 
   gen_latex_table(fondoscala, volt_err, volt, curr100, curr100_err, N_POINTS,
                   3);
-  gen_latex_table(fondoscala, volt_err, volt, curr200, curr200_err, N_POINTS,
-                  3);
+  gen_latex_table(fondoscala, volt_err, volt, curr50, curr50_err, N_POINTS, 3);
 
   TGraphErrors* gr100 =
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
 
   TGraphErrors* gr200 =
-      new TGraphErrors(N_POINTS, volt, curr200, volt_err, curr200_err);
+      new TGraphErrors(N_POINTS, volt, curr50, volt_err, curr50_err);
 
   // Graph - Color - Current Value - Fit Min - Fit Max - Fit M (Optional) - Fit
   // Q (Optional)
@@ -64,8 +71,7 @@ void iv() {
   mg->Add(gr200);
   mg->Draw("AP");
 
-  auto legend = new TLegend(0.15, 0.79, 0.35, 0.89);
-
+  TLegend* legend = new TLegend(0.15, 0.79, 0.35, 0.89);
   legend->AddEntry(gr100, "I_{b} = -100#muA", "lp");
   legend->AddEntry(gr200, "I_{b} = -200#muA", "lp");
   legend->Draw();
@@ -78,7 +84,7 @@ void iv() {
   // Calculate Delta I_C
   Double_t delta_I[N_POINTS] = {};
   for (int i = 0; i < N_POINTS; i++) {
-    delta_I[i] = abs(curr200[i] - curr100[i]);
+    delta_I[i] = abs(curr50[i] - curr100[i]);
   }
 
   TCanvas* c2 = new TCanvas();
@@ -125,8 +131,9 @@ void calc_err(std::string instrument, Double_t* data, Double_t* err,
     if (instrument == "OSCILL") {  // Error on Oscilloscope (Voltage)
       const double TACCHETTE_APPREZZABILI = 0.5;
       err[i] = sqrt(pow(err[i] * TACCHETTE_APPREZZABILI / 5., 2) +
-                    pow(5. * TACCHETTE_APPREZZABILI / 5., 2) +
+                    pow(0.005 * TACCHETTE_APPREZZABILI / 5., 2) +
                     pow(data[i] * 0.03, 2));
+      std::cout << err[i] << '\n';
     } else if (instrument == "MULT") {  // Error on multimeter (Current)
       err[i] =
           static_cast<float>(static_cast<int>(data[i] * 0.015 * 1e4 + 0.5)) /
