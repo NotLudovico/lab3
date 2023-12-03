@@ -11,8 +11,8 @@ void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
                    double width = 0.25, double height = 0.1, double x = 0.65,
                    double y = 0.15, double vert_spacing = 0.01);
 void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
-                     Double_t* curr, Double_t* curr_err, int N_POINTS,
-                     int decimal);
+                     Double_t* curr, Double_t* curr_err, Double_t* curr22,
+                     Double_t* curr2_err, int N_POINTS);
 void approx(double value, double err);
 /*
 
@@ -55,9 +55,8 @@ void iv() {
   calc_err("MULT", curr50, curr50_err, N_POINTS);
   calc_err("OSCILL", volt, volt_err, N_POINTS);
 
-  gen_latex_table(fondoscala, volt_err, volt, curr100, curr100_err, N_POINTS,
-                  3);
-  gen_latex_table(fondoscala, volt_err, volt, curr50, curr50_err, N_POINTS, 3);
+  gen_latex_table(fondoscala, volt_err, volt, curr100, curr100_err, curr50,
+                  curr50_err, N_POINTS);
 
   TGraphErrors* gr100 =
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
@@ -73,6 +72,9 @@ void iv() {
   TMultiGraph* mg = new TMultiGraph();
   mg->Add(gr100);
   mg->Add(gr200);
+  mg->SetTitle("Caratteristica di uscita del BJT; -V_{CE} (V); -I_{C} (mA)");
+  // mg->GetXaxis()->SetTitle("-V_{CE} (V)");
+  // mg->GetYaxis()->SetTitle("-I_{C} (mA)");
   mg->Draw("AP");
 
   TLegend* legend = new TLegend(0.15, 0.79, 0.35, 0.89);
@@ -88,7 +90,8 @@ void iv() {
   // Calculate Delta I_C
   Double_t delta_I[N_POINTS] = {};
   for (int i = 0; i < N_POINTS; i++) {
-    delta_I[i] = abs(curr50[i] - curr100[i]) / 0.05;
+    delta_I[i] =
+        abs(curr50[i] - curr100[i]) / 0.05;  // Divided by \DeltaI (50microA)
   }
 
   TCanvas* c2 = new TCanvas();
@@ -99,7 +102,7 @@ void iv() {
   grDelta->SetMarkerColor(kBlue);
   grDelta->GetXaxis()->SetTitle("-V_{CE} (V)");
   grDelta->GetYaxis()->SetTitle("-#DeltaI_{C}/#DeltaI_{B}");
-  grDelta->SetTitle("#DeltaI/#DeltaI_{B}");
+  grDelta->SetTitle("Guadagno di corrente");
   grDelta->Draw("AP");
 }
 /*
@@ -111,15 +114,12 @@ void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
                  double fit_max, double prov_m = 0.4, double prov_q = 3) {
   graph->SetMarkerStyle(8);
   graph->SetMarkerColor(color);
-  graph->GetXaxis()->SetTitle("-V_{CE} (V)");
-  graph->GetYaxis()->SetTitle("-I_{C} (mA)");
-  graph->SetTitle("Caratteristica di uscita del BJT");
 
   TF1* f = new TF1(("f" + std::to_string(num)).c_str(), "[0]*x+[1]", fit_min,
                    fit_max);
   f->SetLineColor(color);
   f->SetParameter(0, prov_m);
-  f->SetParName(0, ("m_{" + std::to_string(num) + "}").c_str());
+  f->SetParName(0, ("g_{" + std::to_string(num) + "}").c_str());
   f->SetParameter(1, prov_q);
   f->SetParName(1, ("q_{" + std::to_string(num) + "}").c_str());
   graph->Fit(("f" + std::to_string(num)).c_str(), "R");
@@ -127,7 +127,8 @@ void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
 /*
 
   CALCULATE ERROR
-
+  unit 1 -> Volt
+  unit 0.001 -> mVolt
 */
 void calc_err(std::string instrument, Double_t* data, Double_t* err,
               int N_POINTS) {
@@ -137,7 +138,6 @@ void calc_err(std::string instrument, Double_t* data, Double_t* err,
       err[i] = sqrt(pow(err[i] * TACCHETTE_APPREZZABILI / 5., 2) +
                     pow(0.005 * TACCHETTE_APPREZZABILI / 5., 2) +
                     pow(data[i] * 0.03, 2));
-      std::cout << err[i] << '\n';
     } else if (instrument == "MULT") {  // Error on multimeter (Current)
       err[i] =
           static_cast<float>(static_cast<int>(data[i] * 0.015 * 1e4 + 0.5)) /
@@ -176,12 +176,15 @@ void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
 
 */
 void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
-                     Double_t* curr, Double_t* curr_err, int N_POINTS,
-                     int decimal) {
-  std::cout << "\\begin{table}[] \n\\begin{tabular} {| c | c | c |} "
-               "\n\\hline \n"
-               "\\textbf{Fondo Scala (V)} & \\textbf{Tensione V(V)} & "
-               "\\textbf{Corrente I(mA)} \\\\ \\hline \n";
+                     Double_t* curr, Double_t* curr_err, Double_t* curr2,
+                     Double_t* curr2_err, int N_POINTS) {
+  std::cout
+      << "\\begin{table}[] \n\\centering \n\\begin{tabular} {| c | c | c | c "
+         "|} "
+         "\n\\hline \n"
+         "\\textbf{Fondo Scala (V)} & \\textbf{Tensione V(V)} & "
+         "\\textbf{Corrente I(mA) - $50\\mu A$}  & \\textbf{Corrente I(mA) "
+         "$-100\\mu A$}\\\\ \\hline \n";
 
   for (int i = 0; i < N_POINTS; i++) {
     std::cout << "\t" << std::fixed << std::setprecision(3) << fondoscala[i]
@@ -189,7 +192,9 @@ void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
     approx(volt[i], volt_err[i]);
     std::cout << "$ & $";
     approx(curr[i], curr_err[i]);
-    std::cout << "$ \\\\ \\hline \n";
+    std::cout << "$ & $";
+    approx(curr2[i], curr2_err[i]);
+    std::cout << "$  \\\\ \\hline \n";
   }
   std::cout << "\\end{tabular} \n\\end{table}\n\n\n\n";
 }
