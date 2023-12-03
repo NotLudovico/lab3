@@ -10,7 +10,7 @@ void calc_err(std::string instrument, Double_t* data, Double_t* err,
 void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
                    double width = 0.25, double height = 0.1, double x = 0.65,
                    double y = 0.15, double vert_spacing = 0.01);
-void gen_latex_table(Int_t* fondoscala, Double_t* volt_err, Double_t* volt,
+void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
                      Double_t* curr, Double_t* curr_err, int N_POINTS,
                      int decimal);
 void approx(double value, double err);
@@ -31,10 +31,11 @@ void iv() {
                              0.20, 0.24, 0.28, 0.32, 0.36, 0.40, 0.60,
                              0.72, 0.76, 0.80, 0.84, 0.88, 0.92, 0.96,
                              1,    1.5,  2,    2.5,  3,    4};  // Volt
-  Double_t volt_err[N_POINTS] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-                                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
-                                 0.5, 0.5, 0.5, 0.5, 1,   1};  // Volt/Div
-  Double_t curr100[N_POINTS] = {0.9,   1.79,  2.92,  4.34,  5.86,  7.54,  8.91,
+  Double_t volt_err[N_POINTS] = {0.02, 0.02, 0.02, 0.02, 0.1, 0.1, 0.1,
+                                 0.1,  0.1,  0.1,  0.1,  0.1, 0.1, 0.1,
+                                 0.2,  0.2,  0.2,  0.2,  0.2, 0.2, 0.2,
+                                 0.5,  0.5,  0.5,  0.5,  1,   1};  // Volt/Div
+  Double_t curr100[N_POINTS] = {0.90,  1.79,  2.92,  4.34,  5.86,  7.54,  8.91,
                                 10.15, 12.09, 13.21, 13.92, 14.25, 14.92, 15.7,
                                 15.88, 15.99, 16.04, 16.11, 16.16, 16.21, 16.26,
                                 16.4,  16.93, 17.38, 17.67, 18.45, 19.16};
@@ -48,7 +49,7 @@ void iv() {
   Double_t curr50_err[N_POINTS] = {};
 
   // Calculating errors
-  Int_t fondoscala[N_POINTS];  // Don't touch
+  Double_t fondoscala[N_POINTS];  // Don't touch
   std::copy(volt_err, volt_err + N_POINTS, fondoscala);
   calc_err("MULT", curr100, curr100_err, N_POINTS);
   calc_err("MULT", curr50, curr50_err, N_POINTS);
@@ -87,7 +88,7 @@ void iv() {
   // Calculate Delta I_C
   Double_t delta_I[N_POINTS] = {};
   for (int i = 0; i < N_POINTS; i++) {
-    delta_I[i] = abs(curr50[i] - curr100[i]);
+    delta_I[i] = abs(curr50[i] - curr100[i]) / 0.05;
   }
 
   TCanvas* c2 = new TCanvas();
@@ -97,8 +98,8 @@ void iv() {
   grDelta->SetMarkerStyle(8);
   grDelta->SetMarkerColor(kBlue);
   grDelta->GetXaxis()->SetTitle("-V_{CE} (V)");
-  grDelta->GetYaxis()->SetTitle("-#DeltaI_{C} (mA)");
-  grDelta->SetTitle("#DeltaI");
+  grDelta->GetYaxis()->SetTitle("-#DeltaI_{C}/#DeltaI_{B}");
+  grDelta->SetTitle("#DeltaI/#DeltaI_{B}");
   grDelta->Draw("AP");
 }
 /*
@@ -174,16 +175,17 @@ void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
   GENERATE LATEX TABLE WITH DATA AND ERRORS
 
 */
-void gen_latex_table(Int_t* fondoscala, Double_t* volt_err, Double_t* volt,
+void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
                      Double_t* curr, Double_t* curr_err, int N_POINTS,
                      int decimal) {
   std::cout << "\\begin{table}[] \n\\begin{tabular} {| c | c | c |} "
                "\n\\hline \n"
-               "\\textbf{Fondo Scala (mV)} & \\textbf{Tensione V(mV)} & "
+               "\\textbf{Fondo Scala (V)} & \\textbf{Tensione V(V)} & "
                "\\textbf{Corrente I(mA)} \\\\ \\hline \n";
 
   for (int i = 0; i < N_POINTS; i++) {
-    std::cout << "\t" << std::to_string(fondoscala[i]) << " & $";
+    std::cout << "\t" << std::fixed << std::setprecision(3) << fondoscala[i]
+              << " & $";
     approx(volt[i], volt_err[i]);
     std::cout << "$ & $";
     approx(curr[i], curr_err[i]);
@@ -229,8 +231,10 @@ void approx(double value, double err) {
     for (int i = 0; i < counter; i++) {
       pow *= 10;
     }
-    value = static_cast<float>(static_cast<int>(value * pow + approx)) / pow;
-    std::cout << value << " ± " << err_str;
+    std::cout << std::fixed << std::setprecision(counter)
+              << static_cast<float>(static_cast<int>(value * pow + approx)) /
+                     pow
+              << " \\pm " << err_str;
   } else {
     for (int i = 0; i < counter + 1; i++) {
       pow /= 10.;
