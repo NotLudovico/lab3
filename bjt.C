@@ -19,7 +19,7 @@ void approx(double value, double err);
   MACRO
 
 */
-void iv() {
+void bjt() {
   TCanvas* c1 = new TCanvas();
   c1->SetGrid();
   gStyle->SetOptFit(0111);
