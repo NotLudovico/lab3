@@ -104,6 +104,24 @@ void iv() {
   grDelta->GetYaxis()->SetTitle("-#DeltaI_{C}/#DeltaI_{B}");
   grDelta->SetTitle("Guadagno di corrente");
   grDelta->Draw("AP");
+
+  TCanvas* c3 = new TCanvas();
+  TGraphErrors* gr100_inv =
+      new TGraphErrors(N_POINTS, curr100, volt, curr100_err, volt_err);
+
+  TGraphErrors* gr50_inv =
+      new TGraphErrors(N_POINTS, curr50, volt, curr50_err, volt_err);
+
+  // Graph - Color - Current Value - Fit Min - Fit Max - Fit M (Optional) - Fit
+  // Q (Optional)
+  build_graph(gr100_inv, kRed, 100, 15.5, 20);
+  build_graph(gr50_inv, kBlue, 50, 8.6, 10);
+
+  TMultiGraph* mg_inv = new TMultiGraph();
+  mg_inv->Add(gr100_inv);
+  mg_inv->Add(gr50_inv);
+  mg_inv->SetTitle("Inversa;  -I_{C} (mA); -V_{CE} (V)");
+  mg_inv->Draw("AP");
 }
 /*
 
@@ -119,9 +137,9 @@ void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
                    fit_max);
   f->SetLineColor(color);
   f->SetParameter(0, prov_m);
-  f->SetParName(0, ("g_{" + std::to_string(num) + "}").c_str());
+  f->SetParName(0, ("b_{" + std::to_string(num) + "}").c_str());
   f->SetParameter(1, prov_q);
-  f->SetParName(1, ("q_{" + std::to_string(num) + "}").c_str());
+  f->SetParName(1, ("a_{" + std::to_string(num) + "}").c_str());
   graph->Fit(("f" + std::to_string(num)).c_str(), "R");
 }
 /*
