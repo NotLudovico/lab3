@@ -101,7 +101,7 @@ void bjt() {
   grDelta->SetMarkerStyle(8);
   grDelta->SetMarkerColor(kBlue);
   grDelta->GetXaxis()->SetTitle("-V_{CE} (V)");
-  grDelta->GetYaxis()->SetTitle("-#DeltaI_{C}/#DeltaI_{B}");
+  grDelta->GetYaxis()->SetTitle("#DeltaI_{C}/#DeltaI_{B}");
   grDelta->SetTitle("Guadagno di corrente");
   grDelta->Draw("AP");
 
@@ -201,7 +201,7 @@ void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
          "|} "
          "\n\\hline \n"
          "\\textbf{Fondo Scala (V)} & \\textbf{Tensione V(V)} & "
-         "\\textbf{Corrente I(mA) - $50\\mu A$}  & \\textbf{Corrente I(mA) "
+         "\\textbf{Corrente I(mA) $-50\\mu A$}  & \\textbf{Corrente I(mA) "
          "$-100\\mu A$}\\\\ \\hline \n";
 
   for (int i = 0; i < N_POINTS; i++) {
@@ -209,9 +209,9 @@ void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
               << " & $";
     approx(volt[i], volt_err[i]);
     std::cout << "$ & $";
-    approx(curr[i], curr_err[i]);
-    std::cout << "$ & $";
     approx(curr2[i], curr2_err[i]);
+    std::cout << "$ & $";
+    approx(curr[i], curr_err[i]);
     std::cout << "$  \\\\ \\hline \n";
   }
   std::cout << "\\end{tabular} \n\\end{table}\n\n\n\n";
