@@ -7,9 +7,9 @@ void build_graph(TGraphErrors* graph, Color_t color, int num, double fit_min,
                  double fit_max, double prov_m = 0.4, double prov_q = 0);
 void calc_err(std::string instrument, Double_t* data, Double_t* err,
               int N_POINTS);
-void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
-                   double width = 0.25, double height = 0.1, double x = 0.65,
-                   double y = 0.15, double vert_spacing = 0.01);
+void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr50, double width = 0.25,
+                   double height = 0.1, double x = 0.65, double y = 0.15,
+                   double vert_spacing = 0.01);
 void gen_latex_table(Double_t* fondoscala, Double_t* volt_err, Double_t* volt,
                      Double_t* curr, Double_t* curr_err, Double_t* curr22,
                      Double_t* curr2_err, int N_POINTS);
@@ -61,17 +61,17 @@ void bjt() {
   TGraphErrors* gr100 =
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
 
-  TGraphErrors* gr200 =
+  TGraphErrors* gr50 =
       new TGraphErrors(N_POINTS, volt, curr50, volt_err, curr50_err);
 
   // Graph - Color - Current Value - Fit Min - Fit Max - Fit M (Optional) - Fit
   // Q (Optional)
   build_graph(gr100, kRed, 100, 0.5, 4);
-  build_graph(gr200, kBlue, 50, 0.5, 4);
+  build_graph(gr50, kBlue, 50, 0.5, 4);
 
   TMultiGraph* mg = new TMultiGraph();
   mg->Add(gr100);
-  mg->Add(gr200);
+  mg->Add(gr50);
   mg->SetTitle("Caratteristica di uscita del BJT; -V_{CE} (V); -I_{C} (mA)");
   // mg->GetXaxis()->SetTitle("-V_{CE} (V)");
   // mg->GetYaxis()->SetTitle("-I_{C} (mA)");
@@ -79,12 +79,12 @@ void bjt() {
 
   TLegend* legend = new TLegend(0.15, 0.79, 0.35, 0.89);
   legend->AddEntry(gr100, "I_{b} = -100#muA", "lp");
-  legend->AddEntry(gr200, "I_{b} = -50#muA", "lp");
+  legend->AddEntry(gr50, "I_{b} = -50#muA", "lp");
   legend->Draw();
 
   // Statistics Box Cosmetics
   c1->Update();
-  set_box_stats(gr100, gr200, 0.25, 0.1, 0.65, 0.15, 0.01);
+  set_box_stats(gr100, gr50, 0.25, 0.1, 0.65, 0.15, 0.01);
   c1->Modified();
 
   // Calculate Delta I_C
@@ -172,16 +172,16 @@ void calc_err(std::string instrument, Double_t* data, Double_t* err,
   SET STATISTICS BOX POSITION
 
 */
-void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr200,
-                   double width = 0.25, double height = 0.1, double x = 0.65,
-                   double y = 0.15, double vert_spacing = 0.01) {
+void set_box_stats(TGraphErrors* gr100, TGraphErrors* gr50, double width = 0.25,
+                   double height = 0.1, double x = 0.65, double y = 0.15,
+                   double vert_spacing = 0.01) {
   TPaveStats* st = (TPaveStats*)gr100->FindObject("stats");
   st->SetX1NDC(x);  // new x start position
   st->SetX2NDC(x + width);
   st->SetY1NDC(y);  // new y start position
   st->SetY2NDC(y + height);
 
-  TPaveStats* st2 = (TPaveStats*)gr200->FindObject("stats");
+  TPaveStats* st2 = (TPaveStats*)gr50->FindObject("stats");
   st2->SetX1NDC(x);  // new x start position
   st2->SetX2NDC(x + width);
   st2->SetY1NDC(y + vert_spacing + height);  // new y start position
