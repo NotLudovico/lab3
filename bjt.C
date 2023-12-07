@@ -106,6 +106,7 @@ void bjt() {
   grDelta->Draw("AP");
 
   TCanvas* c3 = new TCanvas();
+  c3->SetGrid();
   TGraphErrors* gr100_inv =
       new TGraphErrors(N_POINTS, curr100, volt, curr100_err, volt_err);
 
@@ -122,6 +123,11 @@ void bjt() {
   mg_inv->Add(gr50_inv);
   mg_inv->SetTitle("Inversa;  -I_{C} (mA); -V_{CE} (V)");
   mg_inv->Draw("AP");
+
+  // Statistics Box Cosmetics
+  c3->Update();
+  set_box_stats(gr100_inv, gr50_inv, 0.25, 0.1, 0.13, 0.68, 0.01);
+  c3->Modified();
 }
 /*
 
