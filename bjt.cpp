@@ -35,13 +35,12 @@ void bjt() {
   Double_t volt_err[N_POINTS] = {};
   copy(fondoscala, fondoscala + N_POINTS, volt_err);
 
-  calc_err("MULT", curr100, curr100_err, N_POINTS);
-  calc_err("MULT", curr50, curr50_err, N_POINTS);
-  calc_err("OSCILL", volt, volt_err, N_POINTS);
+  // Calculate Errors
+  calc_err_mult_curr(curr100, curr100_err, N_POINTS, 0.01);
+  calc_err_mult_curr(curr50, curr50_err, N_POINTS, 0.01);
+  calc_err_oscill(volt, volt_err, N_POINTS);
 
-  // gen_latex_table(fondoscala, volt_err, volt, curr100, curr100_err, curr50,
-  //                 curr50_err, N_POINTS);
-
+  // 100uA Currente Graph and Fit
   TGraphErrors* gr100 =
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
 
@@ -51,6 +50,7 @@ void bjt() {
   cosm(gr100);
   gr100->SetMarkerColor(kBlue);
 
+  // 50uA Currente Graph and Fit
   TGraphErrors* gr50 =
       new TGraphErrors(N_POINTS, volt, curr50, volt_err, curr50_err);
   param_names = {"a_{50}", "b_{50}"};

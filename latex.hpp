@@ -56,6 +56,6 @@ void gen_latex_table(vector<const char*> titles, vector<ValErr> data,
     }
     std::cout << " \\\\ \\hline \n";
   }
-  std::cout << "\\end{tabular} \n\\end{table}\n\n\n\n";
+  std::cout << "\\end{tabular} \n\\caption{} \n\\end{table}\n\n\n\n";
 }
 #endif

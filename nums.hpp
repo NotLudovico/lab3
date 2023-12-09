@@ -14,7 +14,7 @@ void calc_err_oscill(Double_t* data, Double_t* err, int N_POINTS) {
 void calc_err_mult_curr(Double_t* data, Double_t* err, int N_POINTS,
                         Double_t digit) {
   for (int i = 0; i < N_POINTS; i++) {
-    err[i] = data[i] * 0.015 + digit;
+    err[i] = data[i] * 0.015 + 2 * digit;
   }
 }
 
