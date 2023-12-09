@@ -6,23 +6,22 @@
 #include <string>
 #include <vector>
 
-// ground_fondoscala (5 if mV, 0.005 if V)
-void calc_err(std::string instrument, Double_t* data, Double_t* err,
-              int N_POINTS, double ground_fondoscala) {
+void calc_err_oscill(Double_t* data, Double_t* err, int N_POINTS) {
   for (int i = 0; i < N_POINTS; i++) {
-    if (instrument == "OSCILL") {  // Error on Oscilloscope (Voltage)
-      const double TACCHETTE_APPREZZABILI = 0.5;
-      err[i] = sqrt(pow(err[i] * TACCHETTE_APPREZZABILI / 5., 2) +
-                    pow(ground_fondoscala * TACCHETTE_APPREZZABILI / 5., 2) +
-                    pow(data[i] * 0.03, 2));
-    } else if (instrument == "MULT") {  // Error on multimeter (Current)
-      err[i] =
-          static_cast<float>(static_cast<int>(data[i] * 0.015 * 1e4 + 0.5)) /
-              1e4 +
-          0.02;
-    } else {
-      std::cout << "****** \n INVALID INSTRUMENT \n ******";
-    }
+    err[i] = sqrt(pow(err[i] * 0.5 / 5., 2) + pow(data[i] * 0.03, 2));
+  }
+}
+void calc_err_mult_curr(Double_t* data, Double_t* err, int N_POINTS,
+                        Double_t digit) {
+  for (int i = 0; i < N_POINTS; i++) {
+    err[i] = data[i] * 0.015 + digit;
+  }
+}
+
+void calc_err_mult_volt(Double_t* data, Double_t* err, int N_POINTS,
+                        Double_t digit) {
+  for (int i = 0; i < N_POINTS; i++) {
+    err[i] = data[i] * 0.003 + digit;
   }
 }
 

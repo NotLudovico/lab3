@@ -28,8 +28,8 @@ void si() {
   copy(e_oscill, e_oscill + N_POINTS, fondoscala);
 
   // Calc error
-  calc_err("OSCILL", oscill, e_oscill, N_POINTS, 5);
-  calc_err("MULT", mult, e_mult, N_POINTS, 5);
+  calc_err_oscill(oscill, e_oscill, N_POINTS);
+  calc_err_mult_curr(mult, e_mult, N_POINTS, 0.02);
 
   // Gen Latex Table
   vector<const char*> titles = {"Fondo Scala (mV/Div)", "V(mV)", "I(mA)"};

@@ -22,15 +22,9 @@ void cal() {
   Double_t fondoscala[N_POINTS] = {};
   copy(e_oscill, e_oscill + N_POINTS, fondoscala);
 
-  calc_err("OSCILL", oscill, e_oscill, N_POINTS, 5);
-  // Calculate error
-  for (int i = 0; i < N_POINTS; i++) {
-    // Error on multimeter
-    e_mult[i] =
-        static_cast<float>(static_cast<int>(mult[i] * 0.003 * 10. + 0.5)) /
-            10. +
-        0.1;
-  }
+  calc_err_oscill(oscill, e_oscill, N_POINTS);
+  calc_err_mult_volt(mult, e_mult, N_POINTS, 0.1);
+
   vector<const char*> titles = {"Fondo Scala (mV/Div)", "Oscilloscopio (mV)",
                                 "Multimetro (mV)"};
   vector<ValErr> data = {ValErr(fondoscala), ValErr(oscill, e_oscill),
@@ -39,7 +33,7 @@ void cal() {
   gen_latex_table(titles, data, N_POINTS);
 
   TGraphErrors* gr = new TGraphErrors(N_POINTS, mult, oscill, e_mult, e_oscill);
-  cosm(gr, "Retta di Calibrazione; V_{multimetro}(mV); V_{oscilloscopio}{mV}",
+  cosm(gr, "Retta di Calibrazione; V_{multimetro}(mV); V_{oscilloscopio}(mV)",
        0.6, 4);
   vector<const char*> param_names = {"m", "q"};
   vector<Double_t> param_values = {1., 0.};
