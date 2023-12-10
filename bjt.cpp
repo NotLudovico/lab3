@@ -40,21 +40,22 @@ void bjt() {
   calc_err_mult_curr(curr50, curr50_err, N_POINTS, 0.01);
   calc_err_oscill(volt, volt_err, N_POINTS);
 
-  // 100uA Currente Graph and Fit
+  // 100uA Current Graph and Fit
   TGraphErrors* gr100 =
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
 
-  vector<const char*> param_names = {"a_{100}", "b_{100}"};
-  vector<Double_t> param_values = {1, 1.2};
-  fit(gr100, "[0]+[1]*x", param_names, param_values, 1, 4, kBlue);
+  vector<const char*> param_names = {"V_{A} (100)", "g_{100}"};
+  vector<Double_t> param_values = {-15, 1};
+  fit(gr100, "(x-[0]) * [1]", param_names, param_values, 0.7, 4, kBlue);
+  param_names = {"g_{100}", "q_{100}"};
   cosm(gr100);
   gr100->SetMarkerColor(kBlue);
 
-  // 50uA Currente Graph and Fit
+  // 50uA Current Graph and Fit
   TGraphErrors* gr50 =
       new TGraphErrors(N_POINTS, volt, curr50, volt_err, curr50_err);
-  param_names = {"a_{50}", "b_{50}"};
-  fit(gr50, "[0]+[1]*x", param_names, param_values, 1, 4);
+  param_names = {"V_{A} (50)", "g_{50}"};
+  fit(gr50, "(x-[0]) * [1]", param_names, param_values, 0.7, 4);
   cosm(gr50);
   gr50->SetMarkerColor(kRed);
 
@@ -70,8 +71,8 @@ void bjt() {
   legend->Draw();
 
   // Creating Latex Tables
-  vector<const char*> titles = {"Fondo Scala (V)", "V(V)", "I(mA) - 50\\mu A",
-                                "I(mA) - 100\\mu A"};
+  vector<const char*> titles = {"Fondo Scala (V/Div)", "V(V)",
+                                "I(mA) - $50\\mu A$", "I(mA) - $100\\mu A$"};
   vector<ValErr> data = {ValErr(fondoscala), ValErr(volt, volt_err),
                          ValErr(curr50, curr50_err),
                          ValErr(curr100, curr100_err)};
@@ -94,28 +95,4 @@ void bjt() {
   TGraph* grDelta = new TGraph(N_POINTS, volt, delta_I);
   cosm(grDelta, "Guadagno di corrente; -V_{CE}(V); #DeltaI_{C}/#DeltaI_{B}");
   grDelta->Draw("AP");
-
-  TCanvas* c3 = new TCanvas();
-  c3->SetGrid();
-
-  TGraphErrors* gr100_inv =
-      new TGraphErrors(N_POINTS, curr100, volt, curr100_err, volt_err);
-  param_names = {"a_{100}", "b_{100}"};
-  param_values = {-5, 10};
-  fit(gr100_inv, "[0]+[1]*x", param_names, param_values, 15, 20);
-
-  TGraphErrors* gr50_inv =
-      new TGraphErrors(N_POINTS, curr50, volt, curr50_err, volt_err);
-  param_names = {"a_{50}", "b_{50}"};
-  fit(gr50_inv, "[0]+[1]*x", param_names, param_values, 7, 20);
-
-  TMultiGraph* mg_inv = new TMultiGraph();
-  mg_inv->Add(gr100_inv);
-  mg_inv->Add(gr50_inv);
-  mg_inv->SetTitle("Inversa;  -I_{C} (mA); -V_{CE} (V)");
-  mg_inv->Draw("AP");
-
-  // Statistics Box Cosmetics
-  set_box_stats(c3, gr100_inv, 0.13, 0.78, 0.25, 0.1);
-  set_box_stats(c3, gr50_inv, 0.13, 0.67, 0.25, 0.1);
 }

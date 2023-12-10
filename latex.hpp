@@ -29,7 +29,9 @@ class ValErr {
 
 void gen_latex_table(vector<const char*> titles, vector<ValErr> data,
                      int N_POINTS) {
-  std::cout << "\\begin{table}[] \n\\centering \n\\begin{tabular} {|";
+  std::cout << "\\begin{table}[] \n\\centering\n\\def\\arraystretch{1.3} \% "
+               "Set cell padding"
+               "\n\\begin{tabular} {|";
   for (int i = 0; i < titles.size(); i++) {
     std::cout << " c |";
   }
