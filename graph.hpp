@@ -1,4 +1,3 @@
-
 #ifndef GRAPH
 #define GRAPH
 TF1* fit(TGraph* graph, const char* fit_formula,
