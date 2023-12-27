@@ -45,8 +45,8 @@ void bjt() {
       new TGraphErrors(N_POINTS, volt, curr100, volt_err, curr100_err);
 
   vector<const char*> param_names = {"V_{A} (100)", "g_{100}"};
-  vector<Double_t> param_values = {-15, 1};
-  fit(gr100, "(x-[0]) * [1]", param_names, param_values, 0.7, 4, kBlue);
+  vector<Double_t> param_values = {15, 1};
+  fit(gr100, "(x+[0]) * [1]", param_names, param_values, 0.7, 4, kBlue);
   param_names = {"g_{100}", "q_{100}"};
   cosm(gr100);
   gr100->SetMarkerColor(kBlue);
@@ -55,7 +55,7 @@ void bjt() {
   TGraphErrors* gr50 =
       new TGraphErrors(N_POINTS, volt, curr50, volt_err, curr50_err);
   param_names = {"V_{A} (50)", "g_{50}"};
-  fit(gr50, "(x-[0]) * [1]", param_names, param_values, 0.7, 4);
+  fit(gr50, "(x+[0]) * [1]", param_names, param_values, 0.7, 4);
   cosm(gr50);
   gr50->SetMarkerColor(kRed);
 
@@ -93,6 +93,7 @@ void bjt() {
   c2->SetGrid();
 
   TGraph* grDelta = new TGraph(N_POINTS, volt, delta_I);
-  cosm(grDelta, "Guadagno di corrente; -V_{CE}(V); #DeltaI_{C}/#DeltaI_{B}");
+  cosm(grDelta, "Guadagno di corrente; -V_{CE}(V); #DeltaI_{C}/#DeltaI_{B}",
+       0.6, 8, kBlue);
   grDelta->Draw("AP");
 }
